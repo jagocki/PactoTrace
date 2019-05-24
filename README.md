@@ -1,2 +1,2 @@
 # PactoTrace
-Lightweight .net tracing framework without dependencies.
+Lightweight .Net tracing framework without dependencies.
