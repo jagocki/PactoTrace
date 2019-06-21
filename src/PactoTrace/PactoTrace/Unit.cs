@@ -46,7 +46,7 @@ namespace PactoTrace
             return callbackDelegate.Invoke(arg);
         }
 
-        public TResult Invoke<T1,T2, TResult>(Func<T1, T2 ,TResult> callbackDelegate, T1 arg1, T2 arg2 )
+        public TResult Invoke<T1, T2, TResult>(Func<T1, T2, TResult> callbackDelegate, T1 arg1, T2 arg2)
         {
             return callbackDelegate.Invoke(arg1, arg2);
         }
@@ -54,7 +54,7 @@ namespace PactoTrace
         public static IDisposable ActivityScope<T1, T2, TResult>(Func<T1, T2, TResult> callbackDelegate, T1 arg1, T2 arg2, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             var unit = new Unit("ActivityScope", memberName, sourceFilePath, sourceLineNumber); //Unit.Trace;
-            unit.Invoke(callbackDelegate, arg1,arg2);
+            unit.Invoke(callbackDelegate, arg1, arg2);
             return unit;
         }
 
@@ -64,6 +64,18 @@ namespace PactoTrace
 
             callbackDelegate.Invoke();
             return unit;
+        }
+
+        public static void Scope(Action callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            using (Unit.ActivityScope(callbackDelegate,memberName, sourceFilePath, sourceLineNumber)) ;
+
+        }
+
+        public static void Scope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            using (Unit.ActivityScope<T, TResult>(callbackDelegate, arg, memberName, sourceFilePath, sourceLineNumber)) ;
+
         }
 
         public static IDisposable ActivityScope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
