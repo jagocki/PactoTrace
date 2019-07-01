@@ -1,7 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-
+  <Target Name="PostPackNugetDeploy" AfterTargets="Pack" >
+    <Exec Command="rd /s /q C:\packages\pactotrace\1.0.0" />
+    <Exec Command="nuget.exe add &quot;$(TargetDir)..\pactotrace.1.0.0.nupkg&quot; -source c:\packages" />
+  </Target>
 </Project>
