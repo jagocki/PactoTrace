@@ -47,8 +47,9 @@ namespace SampleCommandLine
                     result = u.Invoke<int, int, int>(logic.DoSomeWorkIntInt, 1, 2);
                 })) ;
 
-
+                int foo = 1;
                 Unit.Scope(() => {
+                    foo += 2;
                     u.Invoke<int, int>((x) => logic.DoSomeWorkInt(x), result);
 
                     u.Invoke<int, int, int>((x, y) => logic.DoSomeWorkIntInt(x, y), 1, 2);

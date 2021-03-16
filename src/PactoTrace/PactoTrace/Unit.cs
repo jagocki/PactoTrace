@@ -5,20 +5,22 @@ using System.Threading.Tasks;
 
 namespace PactoTrace
 {
-    public class Unit : IDisposable
+    sealed public class Unit : IDisposable
     {
         private string operation;
 
-        private Unit(string operation, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        public static Func<IGenericEventSink> eventSinkBuilder;
+
+        public Unit(string operation, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             this.operation = operation;
-            Console.WriteLine($"{operation} Unit Constructor {memberName} {sourceFilePath}:{sourceLineNumber}");
+            //Console.WriteLine($"{operation} Unit Constructor {memberName} {sourceFilePath}:{sourceLineNumber}");
         }
 
 
         public void Dispose()
         {
-            Console.WriteLine($"{operation} Unit Destructor");
+            //Console.WriteLine($"{operation} Unit Destructor");
 
         }
 
@@ -41,6 +43,11 @@ namespace PactoTrace
             callbackDelegate.Invoke(arg);
         }
 
+        public TResult Invoke<TResult>(Func<TResult> callbackDelegate)
+        {
+            return callbackDelegate.Invoke();
+        }
+
         public TResult Invoke<T, TResult>(Func<T, TResult> callbackDelegate, T arg)
         {
             return callbackDelegate.Invoke(arg);
@@ -58,31 +65,54 @@ namespace PactoTrace
             return unit;
         }
 
-        public static IDisposable ActivityScope(Action callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        public static Unit ActivityScope(Action callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             var unit = new Unit("ActivityScope", memberName, sourceFilePath, sourceLineNumber); //Unit.Trace;
-
+            
             callbackDelegate.Invoke();
+            return unit;
+        }
+
+        public static IDisposable ActivityScope<TResult>(Func<TResult> callbackDelegate, out TResult result, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            var unit = new Unit("ActivityScope", memberName, sourceFilePath, sourceLineNumber); //Unit.Trace;
+            result = unit.Invoke(callbackDelegate);
+            return unit;
+        }
+
+        public static IDisposable ActivityScope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, out TResult result ,[CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            var unit = new Unit("ActivityScope",memberName, sourceFilePath, sourceLineNumber); //Unit.Trace;
+            result = unit.Invoke(callbackDelegate, arg);
             return unit;
         }
 
         public static void Scope(Action callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
-            using (Unit.ActivityScope(callbackDelegate,memberName, sourceFilePath, sourceLineNumber)) ;
+            using (Unit.ActivityScope(callbackDelegate, memberName, sourceFilePath, sourceLineNumber)) ;
 
         }
 
-        public static void Scope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        //tutaj
+        public static TResult Scope<TResult>(Func<TResult> callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
-            using (Unit.ActivityScope<T, TResult>(callbackDelegate, arg, memberName, sourceFilePath, sourceLineNumber)) ;
-
+            TResult result = default(TResult);
+            IGenericEventSink sink = eventSinkBuilder.Invoke();
+            using (var scope = sink.StartScope($"{memberName}, {sourceFilePath}, {sourceLineNumber}"))
+            {
+                sink.LogTrace($"Invoking.. {memberName}, {sourceFilePath}, {sourceLineNumber}");
+                using (Unit.ActivityScope<TResult>(callbackDelegate, out result, memberName, sourceFilePath, sourceLineNumber)) ;
+                sink.LogInformation("Invoked");
+            }
+            sink.LogInformation("Invoked2");
+            return result;
         }
 
-        public static IDisposable ActivityScope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        public static TResult Scope<T, TResult>(Func<T, TResult> callbackDelegate, T arg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
-            var unit = new Unit("ActivityScope",memberName, sourceFilePath, sourceLineNumber); //Unit.Trace;
-            unit.Invoke(callbackDelegate, arg);
-            return unit;
+            TResult result = default(TResult);
+            using (Unit.ActivityScope<T, TResult>(callbackDelegate, arg, out result, memberName, sourceFilePath, sourceLineNumber)) ;
+            return result;
         }
 
         //public T Invoke<T>(Func<T> callbackDelegate, T arg)
