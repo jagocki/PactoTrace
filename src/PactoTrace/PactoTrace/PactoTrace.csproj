@@ -12,11 +12,7 @@
     <Exec Command="nuget.exe delete PactoTrace 1.0.0 -source c:\packages" ContinueOnError="true" />
     <!--<Exec Command="rd /s /q C:\packages\pactotrace\1.0.0" />-->
     <!--<Exec Command="nuget.exe add &quot;$(TargetDir)..\pactotrace.1.0.0.snupkg&quot; -source c:\packages" />-->
-    <Exec Command="nuget.exe add &quot;$(TargetDir)..\pactotrace.1.0.0.nupkg&quot; -source c:\packages" />
-    <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\symstore.exe&quot; add /r /o /f &quot;$(TargetDir)*.pdb&quot; /s &quot;c:\Symbols&quot; /t &quot;PactoTrace&quot;" />
+    <!--<Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\symstore.exe&quot; add /r /o /f &quot;$(TargetDir)*.pdb&quot; /s &quot;c:\Symbols&quot; /t &quot;PactoTrace&quot;" />-->
   
   </Target>
-  <ItemGroup>
-    <PackageReference Include="Pdb2Pdb" Version="1.1.0-beta2-19516-01" />
-  </ItemGroup>
 </Project>

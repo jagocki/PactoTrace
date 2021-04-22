@@ -93,18 +93,19 @@ namespace PactoTrace
 
         }
 
-        //tutaj
-        public static TResult Scope<TResult>(Func<TResult> callbackDelegate, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
+        public static TResult Scope<TResult>(Func<TResult> callbackDelegate, 
+            [CallerMemberName] string memberName = "", 
+            [CallerFilePath] string sourceFilePath = "", 
+            [CallerLineNumber] int sourceLineNumber = 0)
         {
             TResult result = default(TResult);
             IGenericEventSink sink = eventSinkBuilder.Invoke();
             using (var scope = sink.StartScope($"{memberName}, {sourceFilePath}, {sourceLineNumber}"))
             {
-                sink.LogTrace($"Invoking.. {memberName}, {sourceFilePath}, {sourceLineNumber}");
-                using (Unit.ActivityScope<TResult>(callbackDelegate, out result, memberName, sourceFilePath, sourceLineNumber)) ;
-                sink.LogInformation("Invoked");
+                sink.LogInformation($"Invoking.. {memberName}, {sourceFilePath}, {sourceLineNumber}");
+                using (Unit.ActivityScope<TResult>(callbackDelegate, out result, memberName, sourceFilePath, sourceLineNumber)) 
+                sink.LogInformation($"Invoked {memberName}, {sourceFilePath}, {sourceLineNumber}");
             }
-            sink.LogInformation("Invoked2");
             return result;
         }
 
@@ -114,32 +115,6 @@ namespace PactoTrace
             using (Unit.ActivityScope<T, TResult>(callbackDelegate, arg, out result, memberName, sourceFilePath, sourceLineNumber)) ;
             return result;
         }
-
-        //public T Invoke<T>(Func<T> callbackDelegate, T arg)
-        //{
-        //    return callbackDelegate.Invoke();
-        //}
-        //public TResult Invoke<T1, TResult>(Func<T1, TResult> callbackDelegate, T1 arg)
-        //{
-        //    //check below
-        //    //https://stackoverflow.com/questions/8511466/whats-the-method-signature-for-passing-an-async-delegate
-        //    return (TResult)callbackDelegate.Invoke(arg);
-        //}
-
-        //public void Invoke(Func<T, T> a)
-        //{
-
-        //}
-
-        void SwapIfGreater<T>(ref T lhs, ref T rhs) where T : System.IComparable<T>
-        {
-            T temp;
-            if (lhs.CompareTo(rhs) > 0)
-            {
-                temp = lhs;
-                lhs = rhs;
-                rhs = temp;
-            }
-        }
+          
     }
 }

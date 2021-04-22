@@ -56,7 +56,7 @@ namespace PactoTrace.Core
         }
         public IDisposable StartScope(string scopeName)
         {
-            return logger.BeginScope(scopeName);
+            return logger.BeginScope("scope: " + scopeName);
         }
 
         //manage packages
